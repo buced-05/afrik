@@ -1,0 +1,49 @@
+{
+  "name": "ivoire.ai - Identification de Plantes Médicinales",
+  "short_name": "ivoire.ai",
+  "description": "Application d'identification de plantes axée sur les usages médicinaux et traditionnels africains",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0ea5e9",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "education", "lifestyle"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Identifier une plante",
+      "short_name": "Identifier",
+      "description": "Prendre une photo pour identifier une plante",
+      "url": "/identify",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Rechercher",
+      "short_name": "Rechercher",
+      "description": "Rechercher une plante par nom ou symptôme",
+      "url": "/search",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}
+

@@ -1,0 +1,33 @@
+[
+  {
+    "id": "fb_20251211_182952_0",
+    "session_id": "session_1765476112125_kj8pivbh5",
+    "user_id": null,
+    "image_hash": "793f8caea6aea3662fb82f6da004ffb15f529bd77fd3966d76280e5398d65965",
+    "image_path": "images\\793f8caea6aea3662fb82f6da004ffb15f529bd77fd3966d76280e5398d65965.jpg",
+    "predicted_plant_id": "3",
+    "predicted_confidence": 78.0,
+    "alternatives": [
+      {
+        "plant_id": "1",
+        "confidence": 54
+      },
+      {
+        "plant_id": "2",
+        "confidence": 36
+      }
+    ],
+    "feedback_type": "rating",
+    "rating": 5,
+    "correct_plant_id": null,
+    "comment": null,
+    "is_correct": null,
+    "timestamp": "2025-12-11T18:29:52.867644",
+    "user_intent": "agriculture",
+    "device_info": null,
+    "status": "pending",
+    "curator_notes": null,
+    "curated_by": null,
+    "curated_at": null
+  }
+]

@@ -1,0 +1,41 @@
+{
+  "name": "ivoire-ai",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "dev:all": "node start-dev.js",
+    "app": "node start-dev.js",
+    "clean": "rm -rf .next node_modules/.cache .turbo",
+    "clean:win": "if exist .next rmdir /s /q .next && if exist node_modules\\.cache rmdir /s /q node_modules\\.cache",
+    "fix-build": "node scripts/fix-build.js",
+    "backend": "cd backend && python -m uvicorn app.main:app --reload",
+    "backend:install": "cd backend && pip install -r requirements.txt"
+  },
+  "dependencies": {
+    "@ducanh2912/next-pwa": "^10.2.9",
+    "@tensorflow/tfjs": "^4.15.0",
+    "@types/node": "^20.10.6",
+    "@types/react": "^18.2.46",
+    "@types/react-dom": "^18.2.18",
+    "idb": "^8.0.0",
+    "lucide-react": "^0.556.0",
+    "next": "^14.2.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.56.0",
+    "eslint-config-next": "^14.2.5",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.4.0"
+  },
+  "overrides": {
+    "glob": "^10.5.0"
+  }
+}

@@ -1,0 +1,23 @@
+// Script simple pour créer des icônes de base
+// Note: Dans un vrai projet, utilisez un outil comme sharp ou ImageMagick
+const fs = require('fs');
+const path = require('path');
+
+// Créer un SVG simple pour les icônes
+const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0ea5e9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#10b981;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="100" fill="url(#grad)"/>
+  <path d="M256 128L200 200L256 272L312 200Z" fill="white" opacity="0.9"/>
+  <circle cx="256" cy="350" r="40" fill="white" opacity="0.9"/>
+  <path d="M200 400L256 450L312 400" stroke="white" stroke-width="20" stroke-linecap="round" fill="none" opacity="0.9"/>
+</svg>`;
+
+// Pour l'instant, on va juste créer un fichier SVG
+// Les PNG seront créés manuellement ou avec un outil externe
+console.log('Icône SVG créée. Pour créer les PNG, utilisez un convertisseur SVG->PNG en ligne.');
+

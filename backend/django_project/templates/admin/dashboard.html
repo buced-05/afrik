@@ -1,0 +1,1746 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Tableau de bord | {{ block.super }}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #06b6d4;
+        --purple: #8b5cf6;
+        --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+        --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
+        --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
+        --shadow-xl: 0 20px 40px rgba(0,0,0,0.2);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    [data-theme="dark"] {
+        --bg-primary: #0f172a;
+        --bg-secondary: #1e293b;
+        --bg-card: #1e293b;
+        --text-primary: #f1f5f9;
+        --text-secondary: #cbd5e1;
+        --border-color: #334155;
+    }
+    
+    [data-theme="light"] {
+        --bg-primary: #f8fafc;
+        --bg-secondary: #ffffff;
+        --bg-card: #ffffff;
+        --text-primary: #0f172a;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+    }
+    
+    body {
+        background: var(--bg-primary);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        color: var(--text-primary);
+        transition: var(--transition);
+    }
+    
+    #content {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        width: 100% !important;
+    }
+    
+    /* Navigation Sidebar */
+    .nav-sidebar {
+        position: fixed;
+        left: 0;
+        top: 60px;
+        width: 280px;
+        height: calc(100vh - 60px);
+        background: var(--bg-card);
+        border-right: 1px solid var(--border-color);
+        overflow-y: auto;
+        overflow-x: hidden;
+        z-index: 999;
+        transition: transform 0.3s ease;
+        box-shadow: var(--shadow-md);
+    }
+    
+    .nav-sidebar.collapsed {
+        transform: translateX(-100%);
+    }
+    
+    .nav-sidebar::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .nav-sidebar::-webkit-scrollbar-track {
+        background: var(--bg-secondary);
+    }
+    
+    .nav-sidebar::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 3px;
+    }
+    
+    .nav-sidebar::-webkit-scrollbar-thumb:hover {
+        background: var(--text-secondary);
+    }
+    
+    .nav-menu {
+        padding: 20px 0;
+        list-style: none;
+        margin: 0;
+    }
+    
+    .nav-section {
+        margin-bottom: 32px;
+    }
+    
+    .nav-section-title {
+        padding: 12px 24px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+    }
+    
+    .nav-item {
+        margin: 0;
+        padding: 0;
+    }
+    
+    .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 24px;
+        color: var(--text-primary);
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.9375rem;
+        transition: var(--transition);
+        position: relative;
+        border-left: 3px solid transparent;
+    }
+    
+    .nav-link:hover {
+        background: var(--bg-secondary);
+        color: var(--primary);
+        border-left-color: var(--primary);
+        padding-left: 28px;
+    }
+    
+    .nav-link.active {
+        background: linear-gradient(90deg, rgba(37, 99, 235, 0.1), transparent);
+        color: var(--primary);
+        border-left-color: var(--primary);
+        font-weight: 600;
+    }
+    
+    .nav-link i {
+        width: 20px;
+        text-align: center;
+        font-size: 1.1rem;
+    }
+    
+    .nav-link-badge {
+        margin-left: auto;
+        background: var(--primary);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .menu-toggle {
+        position: fixed;
+        left: 24px;
+        top: 80px;
+        z-index: 1001;
+        background: var(--bg-card);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        padding: 12px;
+        cursor: pointer;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-primary);
+        width: 44px;
+        height: 44px;
+    }
+    
+    .menu-toggle:hover {
+        transform: scale(1.05);
+        box-shadow: var(--shadow-lg);
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+    
+    .dashboard-container {
+        max-width: 100%;
+        padding: 32px;
+        width: 100%;
+        box-sizing: border-box;
+        margin-left: 280px;
+        transition: margin-left 0.3s ease;
+    }
+    
+    .dashboard-container.full-width {
+        margin-left: 0;
+    }
+    
+    /* Theme Toggle Button */
+    .theme-toggle {
+        position: fixed;
+        top: 80px;
+        right: 24px;
+        z-index: 1000;
+        background: var(--bg-card);
+        border: 2px solid var(--border-color);
+        border-radius: 50px;
+        padding: 12px 20px;
+        cursor: pointer;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.875rem;
+    }
+    
+    .theme-toggle:hover {
+        transform: scale(1.05);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .theme-toggle i {
+        font-size: 1.2rem;
+    }
+    
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 48px 40px;
+        margin-bottom: 32px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        color: white;
+        border-radius: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+    
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .dashboard-header h1 {
+        font-size: 2.75rem;
+        font-weight: 900;
+        color: white;
+        margin: 0 0 12px 0;
+        letter-spacing: -0.02em;
+        text-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        position: relative;
+        z-index: 1;
+    }
+    
+    .dashboard-header p {
+        color: rgba(255,255,255,0.95);
+        font-size: 1.25rem;
+        margin: 0;
+        font-weight: 400;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+    
+    .stat-card {
+        background: var(--bg-card);
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: var(--shadow-md);
+        border-left: 5px solid;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        border: 1px solid var(--border-color);
+        animation: slideUp 0.5s ease-out;
+        animation-fill-mode: both;
+    }
+    
+    .stat-card:nth-child(1) { animation-delay: 0.05s; }
+    .stat-card:nth-child(2) { animation-delay: 0.1s; }
+    .stat-card:nth-child(3) { animation-delay: 0.15s; }
+    .stat-card:nth-child(4) { animation-delay: 0.2s; }
+    .stat-card:nth-child(5) { animation-delay: 0.25s; }
+    .stat-card:nth-child(6) { animation-delay: 0.3s; }
+    .stat-card:nth-child(7) { animation-delay: 0.35s; }
+    .stat-card:nth-child(8) { animation-delay: 0.4s; }
+    .stat-card:nth-child(9) { animation-delay: 0.45s; }
+    .stat-card:nth-child(10) { animation-delay: 0.5s; }
+    
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        transition: left 0.5s;
+    }
+    
+    .stat-card:hover::before {
+        left: 100%;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: var(--shadow-xl);
+    }
+    
+    .stat-card.primary { border-left-color: #2563eb; }
+    .stat-card.success { border-left-color: #10b981; }
+    .stat-card.warning { border-left-color: #f59e0b; }
+    .stat-card.danger { border-left-color: #ef4444; }
+    .stat-card.info { border-left-color: #06b6d4; }
+    .stat-card.purple { border-left-color: #8b5cf6; }
+    .stat-card.conservation { border-left-color: #059669; }
+    
+    .stat-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+    
+    .stat-card-title {
+        font-size: 0.9375rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 12px;
+    }
+    
+    .stat-card-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        flex-shrink: 0;
+        transition: var(--transition);
+    }
+    
+    .stat-card:hover .stat-card-icon {
+        transform: rotate(10deg) scale(1.1);
+    }
+    
+    .stat-card.primary .stat-card-icon { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
+    .stat-card.success .stat-card-icon { background: linear-gradient(135deg, #d1fae5, #a7f3d0); }
+    .stat-card.warning .stat-card-icon { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+    .stat-card.danger .stat-card-icon { background: linear-gradient(135deg, #fee2e2, #fecaca); }
+    .stat-card.info .stat-card-icon { background: linear-gradient(135deg, #cffafe, #a5f3fc); }
+    .stat-card.purple .stat-card-icon { background: linear-gradient(135deg, #ede9fe, #ddd6fe); }
+    .stat-card.conservation .stat-card-icon { background: linear-gradient(135deg, #d1fae5, #86efac); }
+    
+    .stat-card-value {
+        font-size: 3rem;
+        font-weight: 900;
+        color: var(--text-primary);
+        margin: 16px 0;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, var(--primary), var(--purple));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .stat-card-change {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+    }
+    
+    .stat-card-change.positive {
+        color: #10b981;
+    }
+    
+    .stat-card-change.negative {
+        color: #ef4444;
+    }
+    
+    .stat-card-change.warning {
+        color: #f59e0b;
+    }
+    
+    .chart-card {
+        background: var(--bg-card);
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 32px;
+        border: 1px solid var(--border-color);
+        transition: var(--transition);
+        animation: fadeIn 0.6s ease-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .chart-card:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
+    }
+    
+    .chart-card-header {
+        margin-bottom: 28px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+    
+    .chart-card-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin: 0 0 8px 0;
+        letter-spacing: -0.01em;
+    }
+    
+    .chart-card-subtitle {
+        font-size: 0.9375rem;
+        color: var(--text-secondary);
+        margin: 0;
+        font-weight: 500;
+    }
+    
+    .chart-card-header {
+        border-bottom: 2px solid var(--border-color);
+    }
+    
+    .chart-container-inner {
+        height: 350px;
+        position: relative;
+    }
+    
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 32px;
+        margin-bottom: 32px;
+    }
+    
+    @media (max-width: 1400px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .nav-sidebar {
+            transform: translateX(-100%);
+        }
+        
+        .nav-sidebar.expanded {
+            transform: translateX(0);
+        }
+        
+        .dashboard-container {
+            margin-left: 0;
+        }
+        
+        .menu-toggle {
+            display: flex;
+        }
+    }
+    
+    @media (min-width: 1025px) {
+        .menu-toggle {
+            display: none;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .stat-card-value {
+            font-size: 2.25rem;
+        }
+        
+        .dashboard-header h1 {
+            font-size: 2rem;
+        }
+        
+        .theme-toggle {
+            top: 70px;
+            right: 16px;
+            padding: 10px 16px;
+            font-size: 0.75rem;
+        }
+        
+        .theme-toggle span {
+            display: none;
+        }
+        
+        .nav-sidebar {
+            width: 100%;
+            top: 60px;
+        }
+    }
+    
+    .table-card {
+        background: var(--bg-card);
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: var(--shadow-md);
+        overflow-x: auto;
+        border: 1px solid var(--border-color);
+        transition: var(--transition);
+    }
+    
+    .table-card:hover {
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .table-card table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .table-card th {
+        text-align: left;
+        padding: 16px 20px;
+        font-size: 0.8125rem;
+        font-weight: 700;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        border-bottom: 2px solid var(--border-color);
+        background: var(--bg-secondary);
+    }
+    
+    .table-card td {
+        padding: 20px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9375rem;
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+    
+    .table-card tbody tr:hover {
+        background: var(--bg-secondary);
+        transform: scale(1.01);
+        transition: all 0.2s ease;
+    }
+    
+    .badge {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 12px;
+        font-size: 0.8125rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+    }
+    
+    .badge-success { background: #d1fae5; color: #065f46; }
+    .badge-warning { background: #fef3c7; color: #92400e; }
+    .badge-danger { background: #fee2e2; color: #991b1b; }
+    .badge-primary { background: #dbeafe; color: #1e40af; }
+    .badge-info { background: #cffafe; color: #164e63; }
+    
+    .period-filter-section {
+        background: var(--bg-card);
+        padding: 24px;
+        border-radius: 20px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        margin-bottom: 32px;
+    }
+    
+    .filter-tabs {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+    
+    .filter-tab {
+        padding: 12px 24px;
+        background: var(--bg-secondary);
+        border: 2px solid transparent;
+        border-radius: 12px;
+        text-decoration: none;
+        color: var(--text-secondary);
+        font-size: 0.9375rem;
+        font-weight: 600;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .filter-tab::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(37, 99, 235, 0.1);
+        transform: translate(-50%, -50%);
+        transition: width 0.3s, height 0.3s;
+    }
+    
+    .filter-tab:hover::before {
+        width: 200px;
+        height: 200px;
+    }
+    
+    .filter-tab:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        transform: translateY(-2px);
+    }
+    
+    .filter-tab.active {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        border-color: var(--primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        transform: translateY(-2px);
+    }
+    
+    /* Section de conservation */
+    .conservation-section {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%);
+        border-radius: 20px;
+        padding: 40px;
+        margin-bottom: 32px;
+        border: 2px solid var(--success);
+        box-shadow: var(--shadow-md);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .conservation-section::before {
+        content: '🌱';
+        position: absolute;
+        top: -30px;
+        right: -30px;
+        font-size: 200px;
+        opacity: 0.05;
+        transform: rotate(-15deg);
+    }
+    
+    .conservation-section h2 {
+        font-size: 2rem;
+        font-weight: 900;
+        color: var(--success);
+        margin: 0 0 32px 0;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .conservation-stat {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        transition: var(--transition);
+    }
+    
+    .conservation-stat:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .conservation-stat-value {
+        color: var(--success);
+    }
+    
+    .conservation-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    
+    .conservation-stat {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    
+    .conservation-stat-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+    }
+    
+    .conservation-stat-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #059669;
+    }
+</style>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Theme Toggle - Dark Mode / Light Mode
+    const themeToggle = document.createElement('div');
+    themeToggle.className = 'theme-toggle';
+    themeToggle.innerHTML = '<i class="fas fa-moon"></i> <span>Dark Mode</span>';
+    themeToggle.addEventListener('click', function() {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('dashboard-theme', newTheme);
+        this.innerHTML = newTheme === 'dark' 
+            ? '<i class="fas fa-sun"></i> <span>Light Mode</span>'
+            : '<i class="fas fa-moon"></i> <span>Dark Mode</span>';
+        // Update charts
+        updateChartsTheme(newTheme);
+    });
+    document.body.appendChild(themeToggle);
+    
+    // Load saved theme
+    const savedTheme = localStorage.getItem('dashboard-theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    if (savedTheme === 'dark') {
+        themeToggle.innerHTML = '<i class="fas fa-sun"></i> <span>Light Mode</span>';
+    }
+    
+    // Menu Toggle Functionality
+    const menuToggle = document.getElementById('menuToggle');
+    const navSidebar = document.getElementById('navSidebar');
+    const dashboardContainer = document.getElementById('dashboardContainer');
+    
+    if (menuToggle && navSidebar && dashboardContainer) {
+        const isMobile = window.innerWidth < 1025;
+        let menuOpen = !isMobile;
+        
+        // Load saved menu state
+        const savedMenuState = localStorage.getItem('menuOpen');
+        if (savedMenuState !== null) {
+            menuOpen = savedMenuState === 'true';
+        }
+        
+        function updateMenuState() {
+            if (isMobile) {
+                if (menuOpen) {
+                    navSidebar.classList.add('expanded');
+                    navSidebar.classList.remove('collapsed');
+                } else {
+                    navSidebar.classList.remove('expanded');
+                    navSidebar.classList.add('collapsed');
+                }
+            } else {
+                if (menuOpen) {
+                    navSidebar.classList.remove('collapsed');
+                    dashboardContainer.classList.remove('full-width');
+                } else {
+                    navSidebar.classList.add('collapsed');
+                    dashboardContainer.classList.add('full-width');
+                }
+            }
+            localStorage.setItem('menuOpen', menuOpen);
+        }
+        
+        // Update menu icon
+        function updateMenuIcon() {
+            const icon = menuToggle.querySelector('i');
+            if (icon) {
+                icon.className = menuOpen ? 'fas fa-times' : 'fas fa-bars';
+            }
+        }
+        
+        menuToggle.addEventListener('click', function() {
+            menuOpen = !menuOpen;
+            updateMenuState();
+            updateMenuIcon();
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            const wasMobile = isMobile;
+            isMobile = window.innerWidth < 1025;
+            
+            if (wasMobile !== isMobile) {
+                updateMenuState();
+            }
+        });
+        
+        // Initialize menu state
+        updateMenuState();
+        updateMenuIcon();
+        
+        // Close menu when clicking outside on mobile
+        if (isMobile) {
+            document.addEventListener('click', function(e) {
+                if (menuOpen && !navSidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                    menuOpen = false;
+                    updateMenuState();
+                    updateMenuIcon();
+                }
+            });
+        }
+        
+        // Set active nav link
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.nav-link').forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+            }
+        });
+    }
+    
+    // Function to update chart themes
+    function updateChartsTheme(theme) {
+        const textColor = theme === 'dark' ? '#cbd5e1' : '#64748b';
+        Chart.helpers.each(Chart.instances, function(instance) {
+            if (instance.config.options.scales) {
+                Object.keys(instance.config.options.scales).forEach(function(key) {
+                    if (instance.config.options.scales[key].ticks) {
+                        instance.config.options.scales[key].ticks.color = textColor;
+                    }
+                    if (instance.config.options.scales[key].grid) {
+                        instance.config.options.scales[key].grid.color = theme === 'dark' ? '#334155' : '#f1f5f9';
+                    }
+                });
+            }
+            if (instance.config.options.plugins && instance.config.options.plugins.legend) {
+                if (instance.config.options.plugins.legend.labels) {
+                    instance.config.options.plugins.legend.labels.color = textColor;
+                }
+            }
+            instance.update();
+        });
+    }
+    // Graphique plantes par type
+    const plantsTypeCtx = document.getElementById('plantsTypeChart');
+    if (plantsTypeCtx) {
+        const plantsTypeData = JSON.parse('{{ plants_by_type|escapejs }}');
+        new Chart(plantsTypeCtx, {
+            type: 'doughnut',
+            data: {
+                labels: plantsTypeData.map(item => {
+                    const types = {'arbre': 'Arbres', 'arbuste': 'Arbustes', 'herbe': 'Herbes', 'liane': 'Lianes', 'autre': 'Autres'};
+                    return types[item.plant_type] || item.plant_type || 'N/A';
+                }),
+                datasets: [{
+                    data: plantsTypeData.map(item => item.count),
+                    backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#06b6d4', '#8b5cf6'],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    animateRotate: true,
+                    animateScale: true,
+                    duration: 1500,
+                    easing: 'easeOutQuart'
+                },
+                plugins: {
+                    legend: { 
+                        position: 'bottom', 
+                        labels: { 
+                            font: { size: 14, weight: '600', family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' },
+                            padding: 15,
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary') || '#0f172a'
+                        } 
+                    },
+                    title: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                        padding: 12,
+                        titleFont: { size: 14, weight: '600' },
+                        bodyFont: { size: 13 },
+                        cornerRadius: 8,
+                        displayColors: true
+                    }
+                }
+            }
+        });
+    }
+    
+    // Graphique feedbacks par statut
+    const feedbacksStatusCtx = document.getElementById('feedbacksStatusChart');
+    if (feedbacksStatusCtx) {
+        const feedbacksStatusData = JSON.parse('{{ feedbacks_by_status|escapejs }}');
+        const statusLabels = {'pending': 'En attente', 'approved': 'Approuvé', 'rejected': 'Rejeté', 'used': 'Utilisé'};
+        new Chart(feedbacksStatusCtx, {
+            type: 'bar',
+            data: {
+                labels: feedbacksStatusData.map(item => statusLabels[item.status] || item.status || 'N/A'),
+                datasets: [{
+                    label: 'Nombre',
+                    data: feedbacksStatusData.map(item => item.count),
+                    backgroundColor: ['#f59e0b', '#10b981', '#ef4444', '#06b6d4'],
+                    borderRadius: 12,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 1500,
+                    easing: 'easeOutQuart'
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                        padding: 12,
+                        titleFont: { size: 14, weight: '600' },
+                        bodyFont: { size: 13 },
+                        cornerRadius: 8
+                    }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true, 
+                        ticks: { 
+                            font: { size: 13, weight: '600', family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' },
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary') || '#64748b'
+                        },
+                        grid: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--border-color') || '#f1f5f9'
+                        }
+                    },
+                    x: { 
+                        ticks: { 
+                            font: { size: 13, weight: '600', family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' },
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary') || '#64748b'
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Graphique temporel
+    const timelineCtx = document.getElementById('timelineChart');
+    if (timelineCtx) {
+        new Chart(timelineCtx, {
+            type: 'line',
+            data: {
+                labels: JSON.parse('{{ timeline_labels|escapejs }}'),
+                datasets: [{
+                    label: 'Feedbacks',
+                    data: JSON.parse('{{ timeline_data|escapejs }}'),
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 3,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    pointBackgroundColor: '#2563eb',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 1500,
+                    easing: 'easeOutQuart'
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                        padding: 12,
+                        titleFont: { size: 14, weight: '600' },
+                        bodyFont: { size: 13 },
+                        cornerRadius: 8
+                    }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true, 
+                        ticks: { 
+                            font: { size: 13, weight: '600', family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' },
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary') || '#64748b'
+                        },
+                        grid: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--border-color') || '#f1f5f9'
+                        }
+                    },
+                    x: { 
+                        ticks: { 
+                            font: { size: 13, weight: '600', family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' },
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary') || '#64748b'
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Graphique évolution mensuelle
+    const monthlyCtx = document.getElementById('monthlyChart');
+    if (monthlyCtx) {
+        new Chart(monthlyCtx, {
+            type: 'line',
+            data: {
+                labels: JSON.parse('{{ monthly_labels|escapejs }}'),
+                datasets: [{
+                    label: 'Nouvelles plantes',
+                    data: JSON.parse('{{ monthly_plants|escapejs }}'),
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 3,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    pointBackgroundColor: '#10b981',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2
+                }, {
+                    label: 'Feedbacks',
+                    data: JSON.parse('{{ monthly_feedbacks|escapejs }}'),
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 3,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    pointBackgroundColor: '#2563eb',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { 
+                        labels: { 
+                            font: { size: 14, weight: '600', family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' },
+                            padding: 15
+                        } 
+                    }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true, 
+                        ticks: { 
+                            font: { size: 13, weight: '600', family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' },
+                            color: '#64748b'
+                        },
+                        grid: {
+                            color: '#f1f5f9'
+                        }
+                    },
+                    x: { 
+                        ticks: { 
+                            font: { size: 13, weight: '600', family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' },
+                            color: '#64748b'
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Graphique familles
+    const familiesCtx = document.getElementById('familiesChart');
+    if (familiesCtx) {
+        const familiesData = JSON.parse('{{ top_families|escapejs }}');
+        new Chart(familiesCtx, {
+            type: 'bar',
+            data: {
+                labels: familiesData.map(item => item.family || 'N/A'),
+                datasets: [{
+                    label: 'Espèces',
+                    data: familiesData.map(item => item.count),
+                    backgroundColor: '#8b5cf6',
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { 
+                        beginAtZero: true, 
+                        ticks: { 
+                            font: { size: 13, weight: '600', family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' },
+                            color: '#64748b'
+                        },
+                        grid: {
+                            color: '#f1f5f9'
+                        }
+                    },
+                    y: { 
+                        ticks: { 
+                            font: { size: 13, weight: '600', family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' },
+                            color: '#64748b'
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- Menu Toggle Button -->
+<div class="menu-toggle" id="menuToggle">
+    <i class="fas fa-bars"></i>
+</div>
+
+<!-- Navigation Sidebar -->
+<nav class="nav-sidebar" id="navSidebar">
+    <ul class="nav-menu">
+        <li class="nav-section">
+            <div class="nav-section-title">Tableau de bord</div>
+            <div class="nav-item">
+                <a href="{{ admin_urls.dashboard }}" class="nav-link active">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{{ admin_urls.index }}" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Accueil Admin</span>
+                </a>
+            </div>
+        </li>
+        
+        <li class="nav-section">
+            <div class="nav-section-title">Espèces végétales</div>
+            <div class="nav-item">
+                <a href="{{ admin_urls.plants }}" class="nav-link">
+                    <i class="fas fa-leaf"></i>
+                    <span>Toutes les plantes</span>
+                    <span class="nav-link-badge">{{ total_plants }}</span>
+                </a>
+                <a href="{{ admin_urls.plant_add }}" class="nav-link">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Ajouter une plante</span>
+                </a>
+                <a href="{{ admin_urls.medicinal_properties }}" class="nav-link">
+                    <i class="fas fa-pills"></i>
+                    <span>Propriétés médicinales</span>
+                    <span class="nav-link-badge">{{ total_medicinal_properties }}</span>
+                </a>
+                <a href="{{ admin_urls.medicinal_property_add }}" class="nav-link">
+                    <i class="fas fa-plus"></i>
+                    <span>Ajouter propriété</span>
+                </a>
+                <a href="{{ admin_urls.traditional_uses }}" class="nav-link">
+                    <i class="fas fa-book-medical"></i>
+                    <span>Usages traditionnels</span>
+                    <span class="nav-link-badge">{{ total_traditional_uses }}</span>
+                </a>
+                <a href="{{ admin_urls.traditional_use_add }}" class="nav-link">
+                    <i class="fas fa-plus"></i>
+                    <span>Ajouter usage</span>
+                </a>
+            </div>
+        </li>
+        
+        <li class="nav-section">
+            <div class="nav-section-title">Feedbacks</div>
+            <div class="nav-item">
+                <a href="{{ admin_urls.feedbacks }}" class="nav-link">
+                    <i class="fas fa-comments"></i>
+                    <span>Tous les feedbacks</span>
+                    <span class="nav-link-badge">{{ total_feedbacks }}</span>
+                </a>
+                <a href="{{ admin_urls.feedbacks }}?status__exact=pending" class="nav-link">
+                    <i class="fas fa-clock"></i>
+                    <span>En attente</span>
+                    {% if pending_feedbacks > 0 %}
+                    <span class="nav-link-badge" style="background: var(--warning);">{{ pending_feedbacks }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ admin_urls.feedbacks }}?status__exact=approved" class="nav-link">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Approuvés</span>
+                    <span class="nav-link-badge" style="background: var(--success);">{{ approved_feedbacks }}</span>
+                </a>
+            </div>
+        </li>
+        
+        <li class="nav-section">
+            <div class="nav-section-title">Utilisateurs</div>
+            <div class="nav-item">
+                <a href="{{ admin_urls.users }}" class="nav-link">
+                    <i class="fas fa-users"></i>
+                    <span>Utilisateurs</span>
+                </a>
+                <a href="{{ admin_urls.user_add }}" class="nav-link">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Ajouter utilisateur</span>
+                </a>
+                <a href="{{ admin_urls.groups }}" class="nav-link">
+                    <i class="fas fa-users-cog"></i>
+                    <span>Groupes</span>
+                </a>
+            </div>
+        </li>
+        
+        <li class="nav-section">
+            <div class="nav-section-title">Actions rapides</div>
+            <div class="nav-item">
+                <a href="{{ admin_urls.plant_add }}" class="nav-link">
+                    <i class="fas fa-seedling"></i>
+                    <span>Nouvelle espèce</span>
+                </a>
+                <a href="{{ admin_urls.feedbacks }}?status__exact=pending" class="nav-link">
+                    <i class="fas fa-tasks"></i>
+                    <span>Curer feedbacks</span>
+                </a>
+                <a href="{{ admin_urls.plants }}?is_active__exact=1" class="nav-link">
+                    <i class="fas fa-check-double"></i>
+                    <span>Plantes actives</span>
+                </a>
+            </div>
+        </li>
+    </ul>
+</nav>
+
+<div class="dashboard-container" id="dashboardContainer">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <h1>📊 Tableau de bord Pro - Sauvegarde des espèces végétales</h1>
+        <p>Vue d'ensemble complète et interactive de votre application ivoire.ai</p>
+    </div>
+    
+    <!-- Filtres temporels -->
+    <div class="period-filter-section">
+        <!-- Boutons de période rapide -->
+        <div class="filter-tabs">
+            <a href="?period=1" class="filter-tab {% if period == '1' %}active{% endif %}">
+                <i class="fas fa-clock"></i> 24 heures
+            </a>
+            <a href="?period=7" class="filter-tab {% if period == '7' or not period %}active{% endif %}">
+                <i class="fas fa-calendar-week"></i> 7 jours
+            </a>
+            <a href="?period=30" class="filter-tab {% if period == '30' %}active{% endif %}">
+                <i class="fas fa-calendar-alt"></i> 1 mois
+            </a>
+            <a href="?period=365" class="filter-tab {% if period == '365' %}active{% endif %}">
+                <i class="fas fa-calendar"></i> 1 an
+            </a>
+        </div>
+        
+        <!-- Formulaire de période personnalisée -->
+        <div class="custom-period-form">
+            <div class="custom-period-header">
+                <i class="fas fa-calendar-check"></i>
+                <span>Période personnalisée</span>
+            </div>
+            <form method="get" class="date-range-form">
+                <div class="date-inputs">
+                    <div class="date-input-group">
+                        <label for="date_from">
+                            <i class="fas fa-calendar-minus"></i> De :
+                        </label>
+                        <input type="date" id="date_from" name="date_from" value="{% if date_from %}{{ date_from }}{% elif period_start_str %}{{ period_start_str }}{% endif %}" class="date-input">
+                    </div>
+                    <div class="date-input-group">
+                        <label for="date_to">
+                            <i class="fas fa-calendar-plus"></i> À :
+                        </label>
+                        <input type="date" id="date_to" name="date_to" value="{% if date_to %}{{ date_to }}{% elif period_end_str %}{{ period_end_str }}{% endif %}" class="date-input">
+                    </div>
+                    <button type="submit" class="apply-filter-btn">
+                        <i class="fas fa-filter"></i> Appliquer
+                    </button>
+                    {% if date_from or date_to %}
+                    <a href="?" class="clear-filter-btn">
+                        <i class="fas fa-times"></i> Réinitialiser
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+            {% if period_label %}
+            <div class="current-period">
+                <i class="fas fa-info-circle"></i>
+                <span>Période sélectionnée : <strong>{{ period_label }}</strong></span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Cards de statistiques principales -->
+    <div class="stats-grid">
+        <div class="stat-card primary">
+            <div class="stat-card-header">
+                <div style="flex: 1;">
+                    <div class="stat-card-title">Espèces végétales totales</div>
+                    <div class="stat-card-value">{{ total_plants }}</div>
+                    <div class="stat-card-change positive">
+                        <span>↑</span>
+                        <span>{{ active_plants }} actives</span>
+                    </div>
+                </div>
+                <div class="stat-card-icon">🌿</div>
+            </div>
+        </div>
+        
+        <div class="stat-card success">
+            <div class="stat-card-header">
+                <div style="flex: 1;">
+                    <div class="stat-card-title">Espèces documentées</div>
+                    <div class="stat-card-value">{{ plants_with_medicinal }}</div>
+                    <div class="stat-card-change positive">
+                        <span>↑</span>
+                        <span>{{ completeness_rate }}% complètes</span>
+                    </div>
+                </div>
+                <div class="stat-card-icon">📚</div>
+            </div>
+        </div>
+        
+        <div class="stat-card info">
+            <div class="stat-card-header">
+                <div style="flex: 1;">
+                    <div class="stat-card-title">Espèces avec images</div>
+                    <div class="stat-card-value">{{ plants_with_images }}</div>
+                    <div class="stat-card-change {% if plants_without_images > 0 %}warning{% else %}positive{% endif %}">
+                        <span>{% if plants_without_images > 0 %}{{ plants_without_images }} sans images{% else %}Toutes ont des images{% endif %}</span>
+                    </div>
+                </div>
+                <div class="stat-card-icon">📷</div>
+            </div>
+        </div>
+        
+        <div class="stat-card conservation">
+            <div class="stat-card-header">
+                <div style="flex: 1;">
+                    <div class="stat-card-title">Espèces complètement documentées</div>
+                    <div class="stat-card-value">{{ conservation_stats.fully_documented }}</div>
+                    <div class="stat-card-change positive">
+                        <span>↑</span>
+                        <span>Avec images + propriétés + usages</span>
+                    </div>
+                </div>
+                <div class="stat-card-icon">🌱</div>
+            </div>
+        </div>
+        
+        <div class="stat-card warning">
+            <div class="stat-card-header">
+                <div style="flex: 1;">
+                    <div class="stat-card-title">Feedbacks totaux</div>
+                    <div class="stat-card-value">{{ total_feedbacks }}</div>
+                    <div class="stat-card-change {% if pending_feedbacks > 0 %}warning{% else %}positive{% endif %}">
+                        <span>{% if pending_feedbacks > 0 %}⚠ {{ pending_feedbacks }} en attente{% else %}✓ Tous traités{% endif %}</span>
+                    </div>
+                </div>
+                <div class="stat-card-icon">💬</div>
+            </div>
+        </div>
+        
+        <div class="stat-card success">
+            <div class="stat-card-header">
+                <div style="flex: 1;">
+                    <div class="stat-card-title">Taux de précision IA</div>
+                    <div class="stat-card-value">{{ accuracy_rate }}%</div>
+                    <div class="stat-card-change positive">
+                        <span>↑</span>
+                        <span>{{ correct_predictions }}/{{ correct_predictions|add:incorrect_predictions }} correctes</span>
+                    </div>
+                </div>
+                <div class="stat-card-icon">✅</div>
+            </div>
+        </div>
+        
+        <div class="stat-card purple">
+            <div class="stat-card-header">
+                <div style="flex: 1;">
+                    <div class="stat-card-title">Propriétés médicinales</div>
+                    <div class="stat-card-value">{{ total_medicinal_properties }}</div>
+                    <div class="stat-card-change positive">
+                        <span>{{ plants_with_medicinal }} espèces documentées</span>
+                    </div>
+                </div>
+                <div class="stat-card-icon">💊</div>
+            </div>
+        </div>
+        
+        <div class="stat-card info">
+            <div class="stat-card-header">
+                <div style="flex: 1;">
+                    <div class="stat-card-title">Usages traditionnels</div>
+                    <div class="stat-card-value">{{ total_traditional_uses }}</div>
+                    <div class="stat-card-change positive">
+                        <span>{{ plants_with_uses }} espèces avec usages</span>
+                    </div>
+                </div>
+                <div class="stat-card-icon">🌍</div>
+            </div>
+        </div>
+        
+        <div class="stat-card primary">
+            <div class="stat-card-header">
+                <div style="flex: 1;">
+                    <div class="stat-card-title">Note moyenne</div>
+                    <div class="stat-card-value">{{ avg_rating|floatformat:1 }}</div>
+                    <div class="stat-card-change positive">
+                        <span>/ 5.0 étoiles</span>
+                    </div>
+                </div>
+                <div class="stat-card-icon">⭐</div>
+            </div>
+        </div>
+        
+        <div class="stat-card info">
+            <div class="stat-card-header">
+                <div style="flex: 1;">
+                    <div class="stat-card-title">Confiance moyenne</div>
+                    <div class="stat-card-value">{{ avg_confidence|floatformat:1 }}%</div>
+                    <div class="stat-card-change positive">
+                        <span>Niveau de confiance IA</span>
+                    </div>
+                </div>
+                <div class="stat-card-icon">🎯</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Section Statistiques de Conservation -->
+    <div class="conservation-section">
+        <h2>🌱 Statistiques de Conservation des Espèces Végétales</h2>
+        <div class="conservation-grid">
+            <div class="conservation-stat">
+                <div class="conservation-stat-label">Espèces sauvegardées</div>
+                <div class="conservation-stat-value">{{ total_plants }}</div>
+                <div style="font-size: 0.875rem; color: #64748b; margin-top: 8px;">Total d'espèces documentées dans la base</div>
+            </div>
+            <div class="conservation-stat">
+                <div class="conservation-stat-label">Avec documentation complète</div>
+                <div class="conservation-stat-value">{{ conservation_stats.fully_documented }}</div>
+                <div style="font-size: 0.875rem; color: #64748b; margin-top: 8px;">Images + Propriétés + Usages</div>
+            </div>
+            <div class="conservation-stat">
+                <div class="conservation-stat-label">Avec images</div>
+                <div class="conservation-stat-value">{{ conservation_stats.with_images }}</div>
+                <div style="font-size: 0.875rem; color: #64748b; margin-top: 8px;">Espèces photographiées</div>
+            </div>
+            <div class="conservation-stat">
+                <div class="conservation-stat-label">Documentation médicinale</div>
+                <div class="conservation-stat-value">{{ plants_with_medicinal }}</div>
+                <div style="font-size: 0.875rem; color: #64748b; margin-top: 8px;">Espèces avec propriétés documentées</div>
+            </div>
+            <div class="conservation-stat">
+                <div class="conservation-stat-label">Usages traditionnels</div>
+                <div class="conservation-stat-value">{{ plants_with_uses }}</div>
+                <div style="font-size: 0.875rem; color: #64748b; margin-top: 8px;">Espèces avec usages documentés</div>
+            </div>
+            <div class="conservation-stat">
+                <div class="conservation-stat-label">Taux de complétude</div>
+                <div class="conservation-stat-value">{{ completeness_rate }}%</div>
+                <div style="font-size: 0.875rem; color: #64748b; margin-top: 8px;">Niveau de documentation globale</div>
+            </div>
+            {% if conservation_stats.with_description %}
+            <div class="conservation-stat">
+                <div class="conservation-stat-label">Avec description</div>
+                <div class="conservation-stat-value">{{ conservation_stats.with_description }}</div>
+                <div style="font-size: 0.875rem; color: #64748b; margin-top: 8px;">Espèces avec description détaillée</div>
+            </div>
+            {% endif %}
+            {% if conservation_stats.with_regions %}
+            <div class="conservation-stat">
+                <div class="conservation-stat-label">Avec régions</div>
+                <div class="conservation-stat-value">{{ conservation_stats.with_regions }}</div>
+                <div style="font-size: 0.875rem; color: #64748b; margin-top: 8px;">Espèces géolocalisées</div>
+            </div>
+            {% endif %}
+            {% if conservation_stats.with_parts_used %}
+            <div class="conservation-stat">
+                <div class="conservation-stat-label">Avec parties utilisées</div>
+                <div class="conservation-stat-value">{{ conservation_stats.with_parts_used }}</div>
+                <div style="font-size: 0.875rem; color: #64748b; margin-top: 8px;">Espèces avec parties documentées</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Graphiques principaux -->
+    <div class="dashboard-grid">
+        <div class="chart-card">
+            <div class="chart-card-header">
+                <div class="chart-card-title">Évolution mensuelle</div>
+                <div class="chart-card-subtitle">Nouvelles espèces et feedbacks sur les 6 derniers mois</div>
+            </div>
+            <div class="chart-container-inner">
+                <canvas id="monthlyChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-card">
+            <div class="chart-card-header">
+                <div class="chart-card-title">Répartition par type</div>
+                <div class="chart-card-subtitle">Distribution des espèces végétales</div>
+            </div>
+            <div class="chart-container-inner">
+                <canvas id="plantsTypeChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="dashboard-grid">
+        <div class="chart-card">
+            <div class="chart-card-header">
+                <div class="chart-card-title">Activité récente (7 derniers jours)</div>
+                <div class="chart-card-subtitle">Feedbacks reçus quotidiennement</div>
+            </div>
+            <div class="chart-container-inner">
+                <canvas id="timelineChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-card">
+            <div class="chart-card-header">
+                <div class="chart-card-title">Familles botaniques</div>
+                <div class="chart-card-subtitle">Top 5 des familles les plus représentées</div>
+            </div>
+            <div class="chart-container-inner">
+                <canvas id="familiesChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="dashboard-grid">
+        <div class="chart-card">
+            <div class="chart-card-header">
+                <div class="chart-card-title">Statut des feedbacks</div>
+                <div class="chart-card-subtitle">Répartition par statut de curation</div>
+            </div>
+            <div class="chart-container-inner">
+                <canvas id="feedbacksStatusChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="table-card">
+            <div class="chart-card-header">
+                <div class="chart-card-title">Top 5 plantes médicinales</div>
+                <div class="chart-card-subtitle">Espèces avec le plus de propriétés documentées</div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Espèce</th>
+                        <th>Propriétés</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for plant in top_medicinal_plants %}
+                    <tr>
+                        <td>
+                            <strong>{{ plant.scientific_name }}</strong><br>
+                            <small style="color: #64748b;">{{ plant.common_name_fr }}</small>
+                        </td>
+                        <td><span class="badge badge-success">{{ plant.prop_count }}</span></td>
+                        <td style="color: #64748b;">{{ plant.get_plant_type_display_short }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" style="text-align: center; color: #64748b; padding: 24px;">Aucune donnée disponible</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Tableaux de données -->
+    <div class="dashboard-grid">
+        <div class="table-card">
+            <div class="chart-card-header">
+                <div class="chart-card-title">Top 10 espèces identifiées</div>
+                <div class="chart-card-subtitle">Plantes les plus souvent identifiées par l'IA</div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Espèce</th>
+                        <th>Identifications</th>
+                        <th>Famille</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for plant in top_plants %}
+                    <tr>
+                        <td>
+                            <strong>{{ plant.scientific_name }}</strong><br>
+                            <small style="color: #64748b;">{{ plant.common_name_fr }}</small>
+                        </td>
+                        <td><span class="badge badge-primary">{{ plant.feedback_count }}</span></td>
+                        <td style="color: #64748b;">{{ plant.family }}</td>
+                        <td>
+                            {% if plant.is_active %}
+                            <span class="badge badge-success">Active</span>
+                            {% else %}
+                            <span class="badge badge-danger">Inactive</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #64748b; padding: 24px;">Aucune donnée disponible</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="table-card">
+            <div class="chart-card-header">
+                <div class="chart-card-title">Feedbacks récents</div>
+                <div class="chart-card-subtitle">Derniers retours utilisateurs</div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Plante</th>
+                        <th>Type</th>
+                        <th>Statut</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for feedback in recent_feedback_list %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'admin:feedback_predictionfeedback_change' feedback.id %}" style="color: #2563eb; font-weight: 600; text-decoration: none;">
+                                #{{ feedback.id }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if feedback.predicted_plant %}
+                            <strong>{{ feedback.predicted_plant.scientific_name }}</strong><br>
+                            <small style="color: #64748b;">{{ feedback.predicted_confidence|floatformat:1 }}%</small>
+                            {% else %}
+                            <span style="color: #94a3b8;">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td style="color: #64748b;">{{ feedback.get_feedback_type_display }}</td>
+                        <td>
+                            {% if feedback.status == 'approved' %}
+                            <span class="badge badge-success">Approuvé</span>
+                            {% elif feedback.status == 'pending' %}
+                            <span class="badge badge-warning">En attente</span>
+                            {% elif feedback.status == 'rejected' %}
+                            <span class="badge badge-danger">Rejeté</span>
+                            {% else %}
+                            <span class="badge badge-primary">{{ feedback.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td style="color: #64748b; font-size: 0.8rem;">{{ feedback.timestamp|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #64748b; padding: 24px;">Aucun feedback récent</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

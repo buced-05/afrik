@@ -1,0 +1,78 @@
+{
+  "plants": [
+    {
+      "id": "1",
+      "scientific_name": "Aloe vera",
+      "common_names": {
+        "fr": "Aloès",
+        "local": ["Aloès", "Aloé"]
+      },
+      "family": "Asphodelaceae",
+      "genus": "Aloe",
+      "species": "Aloe vera",
+      "description": "Plante succulente aux feuilles charnues et épineuses, largement utilisée en médecine traditionnelle.",
+      "plant_type": "herbe",
+      "parts_used": ["feuilles", "gel"],
+      "region": ["Région tropicale", "Région subtropicale"],
+      "images": [
+        "https://images.unsplash.com/photo-1615367423051-739200480049?w=800&h=600&fit=crop",
+        "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=800&h=600&fit=crop"
+      ]
+    },
+    {
+      "id": "2",
+      "scientific_name": "Azadirachta indica",
+      "common_names": {
+        "fr": "Neem",
+        "local": ["Neem", "Margousier"]
+      },
+      "family": "Meliaceae",
+      "genus": "Azadirachta",
+      "species": "Azadirachta indica",
+      "description": "Arbre à feuilles persistantes, aux propriétés médicinales et insecticides reconnues.",
+      "plant_type": "arbre",
+      "parts_used": ["feuilles", "écorce", "graines", "huile"],
+      "region": ["Région tropicale"],
+      "images": [
+        "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=800&h=600&fit=crop"
+      ]
+    },
+    {
+      "id": "3",
+      "scientific_name": "Moringa oleifera",
+      "common_names": {
+        "fr": "Moringa",
+        "local": ["Moringa", "Nébédaye"]
+      },
+      "family": "Moringaceae",
+      "genus": "Moringa",
+      "species": "Moringa oleifera",
+      "description": "Arbre à croissance rapide, toutes les parties sont utilisées en médecine traditionnelle.",
+      "plant_type": "arbre",
+      "parts_used": ["feuilles", "racines", "écorce", "graines", "fleurs"],
+      "region": ["Région tropicale", "Région subtropicale"],
+      "images": [
+        "https://images.unsplash.com/photo-1615367423051-739200480049?w=800&h=600&fit=crop"
+      ]
+    },
+    {
+      "id": "4",
+      "scientific_name": "Vernonia amygdalina",
+      "common_names": {
+        "fr": "Vernonie",
+        "local": ["Bitter leaf", "Ndolé"]
+      },
+      "family": "Asteraceae",
+      "genus": "Vernonia",
+      "species": "Vernonia amygdalina",
+      "description": "Arbuste aux feuilles amères, très utilisé en cuisine et médecine traditionnelle.",
+      "plant_type": "arbuste",
+      "parts_used": ["feuilles", "racines", "écorce"],
+      "region": ["Région tropicale"],
+      "images": [
+        "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=800&h=600&fit=crop"
+      ]
+    }
+  ]
+}
+

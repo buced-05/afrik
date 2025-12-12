@@ -1,0 +1,688 @@
+{% extends "admin/base.html" %}
+{% load static i18n %}
+
+{% block title %}Accueil | {{ block.super }}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #06b6d4;
+        --purple: #8b5cf6;
+        --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+        --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
+        --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
+        --shadow-xl: 0 20px 40px rgba(0,0,0,0.2);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    [data-theme="dark"] {
+        --bg-primary: #0f172a;
+        --bg-secondary: #1e293b;
+        --bg-card: #1e293b;
+        --text-primary: #f1f5f9;
+        --text-secondary: #cbd5e1;
+        --border-color: #334155;
+    }
+    
+    [data-theme="light"] {
+        --bg-primary: #f8fafc;
+        --bg-secondary: #ffffff;
+        --bg-card: #ffffff;
+        --text-primary: #0f172a;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+    }
+    
+    body {
+        background: var(--bg-primary);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        color: var(--text-primary);
+        transition: var(--transition);
+    }
+    
+    #content {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: var(--bg-primary);
+    }
+    
+    /* Navigation Sidebar - same as dashboard */
+    .nav-sidebar {
+        position: fixed;
+        left: 0;
+        top: 60px;
+        width: 280px;
+        height: calc(100vh - 60px);
+        background: var(--bg-card);
+        border-right: 1px solid var(--border-color);
+        overflow-y: auto;
+        overflow-x: hidden;
+        z-index: 999;
+        transition: transform 0.3s ease;
+        box-shadow: var(--shadow-md);
+    }
+    
+    .nav-sidebar.collapsed {
+        transform: translateX(-100%);
+    }
+    
+    .nav-sidebar::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .nav-sidebar::-webkit-scrollbar-track {
+        background: var(--bg-secondary);
+    }
+    
+    .nav-sidebar::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 3px;
+    }
+    
+    .nav-menu {
+        padding: 20px 0;
+        list-style: none;
+        margin: 0;
+    }
+    
+    .nav-section {
+        margin-bottom: 32px;
+    }
+    
+    .nav-section-title {
+        padding: 12px 24px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+    }
+    
+    .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 24px;
+        color: var(--text-primary);
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.9375rem;
+        transition: var(--transition);
+        position: relative;
+        border-left: 3px solid transparent;
+    }
+    
+    .nav-link:hover {
+        background: var(--bg-secondary);
+        color: var(--primary);
+        border-left-color: var(--primary);
+        padding-left: 28px;
+    }
+    
+    .nav-link.active {
+        background: linear-gradient(90deg, rgba(37, 99, 235, 0.1), transparent);
+        color: var(--primary);
+        border-left-color: var(--primary);
+        font-weight: 600;
+    }
+    
+    .nav-link i {
+        width: 20px;
+        text-align: center;
+        font-size: 1.1rem;
+    }
+    
+    .menu-toggle {
+        position: fixed;
+        left: 24px;
+        top: 80px;
+        z-index: 1001;
+        background: var(--bg-card);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        padding: 12px;
+        cursor: pointer;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-primary);
+        width: 44px;
+        height: 44px;
+    }
+    
+    .menu-toggle:hover {
+        transform: scale(1.05);
+        box-shadow: var(--shadow-lg);
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+    
+    .theme-toggle {
+        position: fixed;
+        top: 80px;
+        right: 24px;
+        z-index: 1000;
+        background: var(--bg-card);
+        border: 2px solid var(--border-color);
+        border-radius: 50px;
+        padding: 12px 20px;
+        cursor: pointer;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.875rem;
+    }
+    
+    .theme-toggle:hover {
+        transform: scale(1.05);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .admin-container {
+        margin-left: 280px;
+        padding: 32px;
+        transition: margin-left 0.3s ease;
+    }
+    
+    .admin-container.full-width {
+        margin-left: 0;
+    }
+    
+    .admin-header {
+        background: var(--gradient-1);
+        padding: 48px 40px;
+        margin-bottom: 32px;
+        box-shadow: var(--shadow-lg);
+        color: white;
+        border-radius: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .admin-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+    
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .admin-header h1 {
+        font-size: 2.75rem;
+        font-weight: 900;
+        color: white;
+        margin: 0 0 12px 0;
+        letter-spacing: -0.02em;
+        text-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        position: relative;
+        z-index: 1;
+    }
+    
+    .admin-header p {
+        color: rgba(255,255,255,0.95);
+        font-size: 1.25rem;
+        margin: 0;
+        font-weight: 400;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .modules-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+    
+    .module-card {
+        background: var(--bg-card);
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        animation: slideUp 0.5s ease-out;
+        animation-fill-mode: both;
+    }
+    
+    .module-card:nth-child(1) { animation-delay: 0.1s; }
+    .module-card:nth-child(2) { animation-delay: 0.2s; }
+    .module-card:nth-child(3) { animation-delay: 0.3s; }
+    .module-card:nth-child(4) { animation-delay: 0.4s; }
+    .module-card:nth-child(5) { animation-delay: 0.5s; }
+    .module-card:nth-child(6) { animation-delay: 0.6s; }
+    
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .module-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        transition: left 0.5s;
+    }
+    
+    .module-card:hover::before {
+        left: 100%;
+    }
+    
+    .module-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-xl);
+    }
+    
+    .module-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid var(--border-color);
+    }
+    
+    .module-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        background: linear-gradient(135deg, var(--primary), var(--purple));
+        color: white;
+        flex-shrink: 0;
+    }
+    
+    .module-title {
+        font-size: 1.375rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin: 0;
+        letter-spacing: -0.01em;
+    }
+    
+    .module-description {
+        font-size: 0.9375rem;
+        color: var(--text-secondary);
+        margin: 0 0 24px 0;
+        line-height: 1.6;
+    }
+    
+    .module-links {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .module-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        text-decoration: none;
+        color: var(--text-primary);
+        font-weight: 500;
+        font-size: 0.9375rem;
+        transition: var(--transition);
+    }
+    
+    .module-link:hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        transform: translateX(4px);
+    }
+    
+    .module-link i {
+        font-size: 1rem;
+        opacity: 0.7;
+    }
+    
+    .module-link:hover i {
+        opacity: 1;
+    }
+    
+    .dashboard-card {
+        grid-column: 1 / -1;
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+        border: 2px solid var(--primary);
+    }
+    
+    .dashboard-card .module-icon {
+        background: var(--gradient-1);
+    }
+    
+    @media (max-width: 1024px) {
+        .nav-sidebar {
+            transform: translateX(-100%);
+        }
+        
+        .nav-sidebar.expanded {
+            transform: translateX(0);
+        }
+        
+        .admin-container {
+            margin-left: 0;
+        }
+        
+        .menu-toggle {
+            display: flex;
+        }
+    }
+    
+    @media (min-width: 1025px) {
+        .menu-toggle {
+            display: none;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .admin-container {
+            padding: 20px;
+        }
+        
+        .modules-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .admin-header h1 {
+            font-size: 2rem;
+        }
+        
+        .theme-toggle {
+            top: 70px;
+            right: 16px;
+            padding: 10px 16px;
+            font-size: 0.75rem;
+        }
+        
+        .theme-toggle span {
+            display: none;
+        }
+        
+        .nav-sidebar {
+            width: 100%;
+            top: 60px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Theme Toggle
+    const themeToggle = document.createElement('div');
+    themeToggle.className = 'theme-toggle';
+    themeToggle.innerHTML = '<i class="fas fa-moon"></i> <span>Dark Mode</span>';
+    themeToggle.addEventListener('click', function() {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('dashboard-theme', newTheme);
+        this.innerHTML = newTheme === 'dark' 
+            ? '<i class="fas fa-sun"></i> <span>Light Mode</span>'
+            : '<i class="fas fa-moon"></i> <span>Dark Mode</span>';
+    });
+    document.body.appendChild(themeToggle);
+    
+    // Load saved theme
+    const savedTheme = localStorage.getItem('dashboard-theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    if (savedTheme === 'dark') {
+        themeToggle.innerHTML = '<i class="fas fa-sun"></i> <span>Light Mode</span>';
+    }
+    
+    // Menu Toggle
+    const menuToggle = document.getElementById('menuToggle');
+    const navSidebar = document.getElementById('navSidebar');
+    const adminContainer = document.getElementById('adminContainer');
+    
+    if (menuToggle && navSidebar && adminContainer) {
+        const isMobile = window.innerWidth < 1025;
+        let menuOpen = !isMobile;
+        
+        const savedMenuState = localStorage.getItem('menuOpen');
+        if (savedMenuState !== null) {
+            menuOpen = savedMenuState === 'true';
+        }
+        
+        function updateMenuState() {
+            if (isMobile) {
+                if (menuOpen) {
+                    navSidebar.classList.add('expanded');
+                    navSidebar.classList.remove('collapsed');
+                } else {
+                    navSidebar.classList.remove('expanded');
+                    navSidebar.classList.add('collapsed');
+                }
+            } else {
+                if (menuOpen) {
+                    navSidebar.classList.remove('collapsed');
+                    adminContainer.classList.remove('full-width');
+                } else {
+                    navSidebar.classList.add('collapsed');
+                    adminContainer.classList.add('full-width');
+                }
+            }
+            localStorage.setItem('menuOpen', menuOpen);
+        }
+        
+        function updateMenuIcon() {
+            const icon = menuToggle.querySelector('i');
+            if (icon) {
+                icon.className = menuOpen ? 'fas fa-times' : 'fas fa-bars';
+            }
+        }
+        
+        menuToggle.addEventListener('click', function() {
+            menuOpen = !menuOpen;
+            updateMenuState();
+            updateMenuIcon();
+        });
+        
+        window.addEventListener('resize', function() {
+            const wasMobile = isMobile;
+            isMobile = window.innerWidth < 1025;
+            if (wasMobile !== isMobile) {
+                updateMenuState();
+            }
+        });
+        
+        updateMenuState();
+        updateMenuIcon();
+        
+        if (isMobile) {
+            document.addEventListener('click', function(e) {
+                if (menuOpen && !navSidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                    menuOpen = false;
+                    updateMenuState();
+                    updateMenuIcon();
+                }
+            });
+        }
+        
+        // Set active nav link
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.nav-link').forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+<!-- Menu Toggle Button -->
+<div class="menu-toggle" id="menuToggle">
+    <i class="fas fa-bars"></i>
+</div>
+
+<!-- Navigation Sidebar -->
+<nav class="nav-sidebar" id="navSidebar">
+    <ul class="nav-menu">
+        <li class="nav-section">
+            <div class="nav-section-title">Tableau de bord</div>
+            <div class="nav-item">
+                <a href="{% url 'admin:dashboard' %}" class="nav-link">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{% url 'admin:index' %}" class="nav-link active">
+                    <i class="fas fa-home"></i>
+                    <span>Accueil Admin</span>
+                </a>
+            </div>
+        </li>
+        
+        <li class="nav-section">
+            <div class="nav-section-title">Espèces végétales</div>
+            <div class="nav-item">
+                <a href="{% url 'admin:plants_plant_changelist' %}" class="nav-link">
+                    <i class="fas fa-leaf"></i>
+                    <span>Toutes les plantes</span>
+                </a>
+                <a href="{% url 'admin:plants_plant_add' %}" class="nav-link">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Ajouter une plante</span>
+                </a>
+                <a href="{% url 'admin:plants_medicinalproperty_changelist' %}" class="nav-link">
+                    <i class="fas fa-pills"></i>
+                    <span>Propriétés médicinales</span>
+                </a>
+                <a href="{% url 'admin:plants_traditionaluse_changelist' %}" class="nav-link">
+                    <i class="fas fa-book-medical"></i>
+                    <span>Usages traditionnels</span>
+                </a>
+            </div>
+        </li>
+        
+        <li class="nav-section">
+            <div class="nav-section-title">Feedbacks</div>
+            <div class="nav-item">
+                <a href="{% url 'admin:feedback_predictionfeedback_changelist' %}" class="nav-link">
+                    <i class="fas fa-comments"></i>
+                    <span>Tous les feedbacks</span>
+                </a>
+                <a href="{% url 'admin:feedback_predictionfeedback_changelist' %}?status__exact=pending" class="nav-link">
+                    <i class="fas fa-clock"></i>
+                    <span>En attente</span>
+                </a>
+            </div>
+        </li>
+        
+        <li class="nav-section">
+            <div class="nav-section-title">Utilisateurs</div>
+            <div class="nav-item">
+                <a href="{% url 'admin:auth_user_changelist' %}" class="nav-link">
+                    <i class="fas fa-users"></i>
+                    <span>Utilisateurs</span>
+                </a>
+                <a href="{% url 'admin:auth_group_changelist' %}" class="nav-link">
+                    <i class="fas fa-users-cog"></i>
+                    <span>Groupes</span>
+                </a>
+            </div>
+        </li>
+    </ul>
+</nav>
+
+<div class="admin-container" id="adminContainer">
+    <div class="admin-header">
+        <h1>🌱 Administration ivoire.ai</h1>
+        <p>Gérez toutes les données de votre application de sauvegarde des espèces végétales</p>
+    </div>
+    
+    <div class="modules-grid">
+        <!-- Dashboard Card -->
+        <div class="module-card dashboard-card">
+            <div class="module-header">
+                <div class="module-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h2 class="module-title">Tableau de bord Pro</h2>
+            </div>
+            <p class="module-description">
+                Accédez au tableau de bord professionnel avec toutes les statistiques, graphiques interactifs et métriques de votre application.
+            </p>
+            <div class="module-links">
+                <a href="{% url 'admin:dashboard' %}" class="module-link">
+                    <span><i class="fas fa-arrow-right"></i> Accéder au dashboard</span>
+                    <i class="fas fa-external-link-alt"></i>
+                </a>
+            </div>
+        </div>
+        
+        {% for app in app_list %}
+            {% for model in app.models %}
+                <div class="module-card">
+                    <div class="module-header">
+                        <div class="module-icon" style="background: {% cycle 'linear-gradient(135deg, #2563eb, #1d4ed8)' 'linear-gradient(135deg, #10b981, #059669)' 'linear-gradient(135deg, #f59e0b, #d97706)' 'linear-gradient(135deg, #8b5cf6, #7c3aed)' 'linear-gradient(135deg, #06b6d4, #0891b2)' 'linear-gradient(135deg, #ef4444, #dc2626)' 'linear-gradient(135deg, #2563eb, #1d4ed8)' %}">
+                            <i class="fas {% cycle 'fa-leaf' 'fa-pills' 'fa-book-medical' 'fa-comments' 'fa-users' 'fa-cog' 'fa-database' %}"></i>
+                        </div>
+                        <h2 class="module-title">{{ model.name }}</h2>
+                    </div>
+                    <p class="module-description">
+                        Gérer les enregistrements de {{ model.name|lower }} dans votre base de données.
+                    </p>
+                    <div class="module-links">
+                        {% if model.admin_url %}
+                        <a href="{{ model.admin_url }}" class="module-link">
+                            <span><i class="fas fa-list"></i> Voir tous</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                        {% endif %}
+                        {% if model.add_url %}
+                        <a href="{{ model.add_url }}" class="module-link">
+                            <span><i class="fas fa-plus"></i> Ajouter</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
