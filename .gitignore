@@ -24,8 +24,13 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files
+# local env files - TOUS les fichiers .env doivent être ignorés
+.env
+.env.local
 .env*.local
+.env.production
+.env.development
+*.env
 
 # vercel
 .vercel

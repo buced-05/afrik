@@ -12,9 +12,13 @@ ENV/
 dist/
 build/
 
-# Environment
+# Environment - Fichiers contenant les secrets
 .env
 .env.local
+.env.production
+.env.development
+*.env
+!.env.example
 
 # Models
 models/*.h5
